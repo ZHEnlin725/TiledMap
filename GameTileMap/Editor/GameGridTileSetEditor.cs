@@ -3,8 +3,7 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
-
-[CustomEditor(typeof(GameGridTileSet),true)]
+[CustomEditor(typeof(GameGridTileSet), true)]
 public sealed class GameGridTileSetEditor : Editor
 {
     private const float SlotSize = 52f;
@@ -329,8 +328,10 @@ public sealed class GameGridTileSetEditor : Editor
             fontSize = 9
         };
         GUI.Label(rect, text, style);
-        EditorGUI.DrawRect(new Rect(rect.x, rect.yMax - 1f, rect.width, 1f), Color.black);
-        EditorGUI.DrawRect(new Rect(rect.xMax - 1f, rect.y, 1f, rect.height), Color.black);
+        EditorGUI.DrawRect(new Rect(rect.x, rect.y, 1, rect.height), Color.black);
+        EditorGUI.DrawRect(new Rect(rect.xMax, rect.y, 1, rect.height), Color.black);
+        EditorGUI.DrawRect(new Rect(rect.x, rect.y, rect.width, 1), Color.black);
+        EditorGUI.DrawRect(new Rect(rect.x, rect.yMax, rect.width, 1), Color.black);
         GUI.color = oldColor;
     }
 
@@ -532,11 +533,11 @@ public sealed class GameGridTileSetEditor : Editor
             {
                 var path = AssetDatabase.GetAssetPath(texture);
                 foreach (var asset in AssetDatabase.LoadAllAssetsAtPath(path))
-                    if (asset is Sprite candidate) return candidate;
+                    if (asset is Sprite candidate)
+                        return candidate;
             }
         }
 
         return null;
     }
-
 }
