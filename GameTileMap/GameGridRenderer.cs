@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.Serialization;
 
 /// <summary>
 /// Renders a cell-based terrain grid on the grid: one tile is placed on each
@@ -14,8 +13,9 @@ using UnityEngine.Serialization;
 [AddComponentMenu("Rendering/Game Grid Renderer")]
 public sealed class GameGridRenderer : MonoBehaviour
 {
-    private const string GeneratedPrefix = "__DualGrid_";
+    private const string GeneratedPrefix = "__Grid_";
     private const int LargeMeshVertexCount = 65000;
+    private const float Epsilon = 0.0001f;
     private static readonly int MainTexProperty = Shader.PropertyToID("_MainTex");
     private static Shader defaultSpriteShader;
 
@@ -23,14 +23,11 @@ public sealed class GameGridRenderer : MonoBehaviour
     private int width = 16;
 
     [SerializeField, Min(1)] private int height = 16;
-    [SerializeField, Min(0.01f)] private float cellSize = 1f;
+    [SerializeField, Min(Epsilon)] private float cellSize = 1f;
     [SerializeField] private bool renderInEditMode = true;
 
     [Header("Terrain")] [SerializeField]
     private List<GameGridTerrainLayer> terrainLayers = new List<GameGridTerrainLayer>();
-
-    [SerializeField, HideInInspector, FormerlySerializedAs("cells")]
-    private GameGridTileSet[] legacyCells;
 
     [SerializeField, HideInInspector] private int cellsWidth;
     [SerializeField, HideInInspector] private int cellsHeight;
@@ -320,7 +317,7 @@ public sealed class GameGridRenderer : MonoBehaviour
     {
         width = Mathf.Max(1, width);
         height = Mathf.Max(1, height);
-        cellSize = Mathf.Max(0.0001f, cellSize);
+        cellSize = Mathf.Max(Epsilon, cellSize);
         if (terrainLayers != null)
         {
             for (var i = 0; i < terrainLayers.Count; i++)
@@ -555,8 +552,8 @@ public sealed class GameGridRenderer : MonoBehaviour
 
         var rect = sprite.rect;
         var localSize = sprite.bounds.size;
-        var scaleX = cellSize / Mathf.Max(0.0001f, localSize.x);
-        var scaleY = cellSize / Mathf.Max(0.0001f, localSize.y);
+        var scaleX = cellSize / Mathf.Max(Epsilon, localSize.x);
+        var scaleY = cellSize / Mathf.Max(Epsilon, localSize.y);
         var pivot = new Vector2(
             sprite.pivot.x / Mathf.Max(1f, rect.width),
             sprite.pivot.y / Mathf.Max(1f, rect.height));
@@ -564,7 +561,6 @@ public sealed class GameGridRenderer : MonoBehaviour
             (pivot.x - 0.5f) * cellSize,
             (pivot.y - 0.5f) * cellSize);
         var baseIndex = buffer.vertices.Count;
-
         for (var i = 0; i < vertices.Length; i++)
         {
             buffer.vertices.Add(new Vector3(
@@ -589,6 +585,7 @@ public sealed class GameGridRenderer : MonoBehaviour
     {
         var texture = sprite.texture;
         var rect = sprite.textureRect;
+        
         if (texture == null || rect.width <= 0f || rect.height <= 0f) return;
 
         var center = anchor;
@@ -684,7 +681,7 @@ public sealed class GameGridRenderer : MonoBehaviour
     {
         var material = template != null ? new Material(template) : new Material(GetDefaultSpriteShader());
         material.hideFlags = HideFlags.DontSave;
-        material.name = texture != null ? texture.name + " DualGrid" : "DualGrid";
+        material.name = texture != null ? texture.name + " Grid" : "Grid";
         if (texture != null)
         {
             material.mainTexture = texture;
