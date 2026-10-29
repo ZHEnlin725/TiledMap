@@ -1,8 +1,12 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
+using System.Numerics;
 using UnityEditor;
 using UnityEngine;
 using UnityEditorInternal;
+using Plane = UnityEngine.Plane;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 
 [CustomEditor(typeof(GameGridRenderer))]
 public sealed class GameGridRendererEditor : Editor
@@ -152,7 +156,9 @@ public sealed class GameGridRendererEditor : Editor
         serializedObject.ApplyModifiedProperties();
         renderer.EditorBrushLayerIndex = index;
         EditorUtility.SetDirty(renderer);
-        renderer.EnsureLayerData(false);
+        renderer.EnsureLayerData(false);     
+        var cellsProperty = element.FindPropertyRelative("cells");
+        cellsProperty.ClearArray();
         renderer.Rebuild();
         GUI.changed = true;
     }
@@ -171,6 +177,8 @@ public sealed class GameGridRendererEditor : Editor
         serializedObject.ApplyModifiedProperties();
         renderer.EditorBrushLayerIndex = index;
         renderer.EnsureLayerData(false);
+        var cellsProperty = element.FindPropertyRelative("cells");
+        cellsProperty.ClearArray();
         EditorUtility.SetDirty(renderer);
         GUI.changed = true;
     }
